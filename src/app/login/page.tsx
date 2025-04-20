@@ -4,9 +4,16 @@ import { useState } from "react";
 import  "./login.module.css";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
+
+    const { loading } = useRedirectIfAuthenticated();
+  
+    if (loading) {
+      return <p>Yonlendiriliyor...</p>;
+    }
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">

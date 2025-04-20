@@ -1,6 +1,6 @@
-import { LoginUserRequest } from "../models/requests/LoginUserRequest";
-import { RegisterUserRequest } from "../models/requests/RegisterUserRequest";
-import { RegisterUserResponse } from "../models/response/RegisterUserResponse";
+import { LoginUserRequest } from "@/models/requests/LoginUserRequest";
+import { RegisterUserRequest } from "@/models/requests/RegisterUserRequest";
+import { RegisterUserResponse } from "@/models/response/RegisterUserResponse";
 import axios from "./axiosInstance";
 
 export const login = async (loginRequest: LoginUserRequest): Promise<string> => {
