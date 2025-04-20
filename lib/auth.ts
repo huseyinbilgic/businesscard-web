@@ -6,7 +6,7 @@ import axios from "./axiosInstance";
 export const login = async (loginRequest: LoginUserRequest): Promise<string> => {
     try {
         const response = await axios.post<string>("auth/login", loginRequest);
-
+        
         if (response.data) {
             localStorage.setItem("token", response.data);
         }

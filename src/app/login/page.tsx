@@ -1,38 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./login.module.css";
+import  "./login.module.css";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 
 export default function LoginPage() {
-    const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(true);
 
-    return (
-      <div className={styles.container}>
-        <div className={styles.card}>
-          <div className={styles.toggle}>
+  return (
+    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+      <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px', borderRadius: '20px' }}>
+        <h3 className="text-center mb-4 text-primary">
+          {isLogin ? 'Welcome Back!' : 'Join Us'}
+        </h3>
+        {isLogin ? <LoginForm /> : <RegisterForm />}
+        <div className="text-center mt-3">
+          <small>
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
-              className={isLogin ? styles.active : ''}
-              onClick={() => setIsLogin(true)}
+              className="btn btn-link p-0"
+              onClick={() => setIsLogin(!isLogin)}
             >
-              Log in
+              {isLogin ? 'Register' : 'Login'}
             </button>
-            <button
-              className={!isLogin ? styles.active : ''}
-              onClick={() => setIsLogin(false)}
-            >
-              Sign up
-            </button>
-          </div>
-  
-          <div className={styles.formContainer}>
-            <div className={`${styles.slider} ${isLogin ? styles.showLogin : styles.showRegister}`}>
-              <LoginForm />
-              <RegisterForm />
-            </div>
-          </div>
+          </small>
         </div>
       </div>
-    );
+    </div>
+  );
 }
