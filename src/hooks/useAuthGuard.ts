@@ -8,14 +8,14 @@ export const useAuthGuard = (): { loading: boolean } => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('jwtToken');
 
     if (!token) {
       router.push('/login');
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   return { loading };
 };

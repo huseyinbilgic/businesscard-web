@@ -7,13 +7,13 @@ export const useRedirectIfAuthenticated = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('jwtToken');
 
         if (token) {
             router.replace('/');
         } else {
             setLoading(false);
         }
-    }, []);
+    }, [router]);
     return { loading };
 };

@@ -8,7 +8,7 @@ export const login = async (loginRequest: LoginUserRequest): Promise<string> => 
         const response = await axios.post<string>("auth/login", loginRequest);
         
         if (response.data) {
-            localStorage.setItem("token", response.data);
+            localStorage.setItem("jwtToken", response.data);
         }
 
         return response.data;
@@ -31,7 +31,7 @@ export const registerUser = async (registerUserRequest: RegisterUserRequest): Pr
 export const logout = async (): Promise<string> => {
     try {
         const res = await axios.post<string>("auth/logout");
-        localStorage.removeItem("token");
+        localStorage.removeItem("jwtToken");
         return res.data;
     } catch (error) {
         console.error("Logout failed:", error);
