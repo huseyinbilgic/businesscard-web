@@ -64,34 +64,42 @@ export default function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(submitRegisterUser)}>
-      <FormInput<RegisterFormData>
-        label="Email address"
-        type="email"
-        name="email"
-        register={register}
-        error={errors.email?.message}
-      />
-      <FormInput<RegisterFormData>
-        label="Username"
-        type="text"
-        name="username"
-        register={register}
-        error={errors.username?.message}
-      />
-      <FormInput<RegisterFormData>
-        label="Password"
-        type="password"
-        name="password"
-        register={register}
-        error={errors.password?.message}
-      />
-      <FormInput<RegisterFormData>
-        label="Confirm Password"
-        type="password"
-        name="confirmPassword"
-        register={register}
-        error={errors.confirmPassword?.message}
-      />
+      <div className="mb-3">
+        <FormInput<RegisterFormData>
+          label="Email address"
+          type="email"
+          name="email"
+          register={register}
+          error={errors.email?.message}
+        />
+      </div>
+      <div className="mb-3">
+        <FormInput<RegisterFormData>
+          label="Username"
+          type="text"
+          name="username"
+          register={register}
+          error={errors.username?.message}
+        />
+      </div>
+      <div className="mb-3">
+        <FormInput<RegisterFormData>
+          label="Password"
+          type="password"
+          name="password"
+          register={register}
+          error={errors.password?.message}
+        />
+      </div>
+      <div className="mb-3">
+        <FormInput<RegisterFormData>
+          label="Confirm Password"
+          type="password"
+          name="confirmPassword"
+          register={register}
+          error={errors.confirmPassword?.message}
+        />
+      </div>
       <button type="submit" className="btn btn-primary w-100">
         Register
       </button>

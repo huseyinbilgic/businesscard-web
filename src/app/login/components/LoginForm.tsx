@@ -39,7 +39,7 @@ export default function LoginForm() {
     try {
       const response = await login(data);
       if (response && response != '') {
-        router.push("/");
+        router.replace("/");
       }
     } catch (error) {
       console.error("Kayıt başarısız:", error);
@@ -53,29 +53,48 @@ export default function LoginForm() {
 
   return (
     <div>
-      <button onClick={() => handleLogin("google")}>Login with Google</button>
-      <button onClick={() => handleLogin("facebook")}>
-        Login with Facebook
+      <button
+        type="button"
+        className="btn btn-lg btn-block btn-primary w-100 mb-3"
+        style={{ backgroundColor: '#dd4b39' }}
+        onClick={() => handleLogin('google')}
+      >
+        <i className="fab fa-google me-2"></i> Sign in with Google
       </button>
+
+      <button
+        type="button"
+        className="btn btn-lg btn-block btn-primary w-100 mb-4"
+        style={{ backgroundColor: '#3b5998' }}
+        onClick={() => handleLogin('facebook')}
+      >
+        <i className="fab fa-facebook-f me-2"></i> Sign in with Facebook
+      </button>
+
       <form onSubmit={handleSubmit(onSubmit)}>
-        <FormInput<LoginFormData>
-          label="Email address or Username"
-          type="text"
-          name="usernameOrEmail"
-          register={register}
-          error={errors.usernameOrEmail?.message}
-        />
-        <FormInput<LoginFormData>
-          label="Password"
-          type="password"
-          name="password"
-          register={register}
-          error={errors.password?.message}
-        />
+        <div className="mb-3">
+          <FormInput<LoginFormData>
+            label="Email address or Username"
+            type="text"
+            name="usernameOrEmail"
+            register={register}
+            error={errors.usernameOrEmail?.message}
+          />
+        </div>
+        <div className="mb-3">
+          <FormInput<LoginFormData>
+            label="Password"
+            type="password"
+            name="password"
+            register={register}
+            error={errors.password?.message}
+          />
+        </div>
         <button type="submit" className="btn btn-primary w-100">
           Login
         </button>
       </form>
     </div>
+
   );
 }
