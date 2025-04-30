@@ -6,6 +6,9 @@ import * as yup from "yup";
 import FormInput from "./FormInput";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setLoggedIn } from "@/store/authSlice";
+import { toast } from "react-toastify";
 
 type LoginFormData = {
   usernameOrEmail: string;
@@ -27,6 +30,7 @@ const schema = yup.object().shape({
 
 export default function LoginForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -39,10 +43,11 @@ export default function LoginForm() {
     try {
       const response = await login(data);
       if (response && response != '') {
+        dispatch(setLoggedIn(true));
         router.replace("/");
       }
     } catch (error) {
-      console.error("Kayıt başarısız:", error);
+      toast.error(`Login failed : ${error}`);
     }
   };
 

@@ -8,6 +8,8 @@ import { useRedirectIfAuthenticated } from "@/hooks/useRedirectIfAuthenticated";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setLoggedIn } from "@/store/authSlice";
 
 
 export default function LoginPage() {
@@ -15,11 +17,13 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const { loading } = useRedirectIfAuthenticated();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const token = searchParams.get('jwtToken');
     if (token) {
       localStorage.setItem('jwtToken', token);
+      dispatch(setLoggedIn(true))
       router.replace('/');
       toast.success('Login succesfull')
     }
@@ -27,9 +31,8 @@ export default function LoginPage() {
     const error = searchParams.get('error');
     if (error) {
       toast.error(error);
-
     }
-  }, [router, searchParams]);
+  }, [dispatch, router, searchParams]);
 
   if (loading) {
     return <p>Yonlendiriliyor...</p>;
@@ -45,7 +48,7 @@ export default function LoginPage() {
           {isLogin ? 'Welcome Back!' : 'Join Us'}
         </h3>
 
-        {isLogin ? <LoginForm /> : <RegisterForm />}
+        {isLogin ? <LoginForm /> : <RegisterForm setIsLogin={setIsLogin}/>}
 
         <div className="text-center mt-3">
           <small>

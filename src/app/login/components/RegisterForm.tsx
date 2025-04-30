@@ -5,6 +5,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import FormInput from "./FormInput";
 import { registerUser } from "@/lib/auth";
+import { toast } from "react-toastify";
+
+type Props = {
+  setIsLogin: (value: boolean) => void;
+};
 
 type RegisterFormData = {
   email: string;
@@ -39,10 +44,11 @@ const schema = yup.object().shape({
     .required("Please confirm your password"),
 });
 
-export default function RegisterForm() {
+export default function RegisterForm({ setIsLogin }: Props) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
     mode: "all",
@@ -56,9 +62,11 @@ export default function RegisterForm() {
     }: RegisterFormData & { confirmPassword: string } = data;
     try {
       const response = await registerUser(registerUserRequest);
-      console.log("Kayıt başarılı:", response);
+      reset();
+      setIsLogin(true);
+      toast.success("Register successfull:", response);
     } catch (error) {
-      console.error("Kayıt başarısız:", error);
+      toast.error(`Register failed: ${error}`);
     }
   };
 

@@ -13,7 +13,6 @@ export const login = async (loginRequest: LoginUserRequest): Promise<string> => 
 
         return response.data;
     } catch (error) {
-        console.error("Login failed:", error);
         throw error;
     }
 };
@@ -23,7 +22,6 @@ export const registerUser = async (registerUserRequest: RegisterUserRequest): Pr
         const res = await axios.post<RegisterUserResponse>("user/signup", registerUserRequest);
         return res.data;
     } catch (error) {
-        console.error("Register failed:", error);
         throw error;
     }
 };
@@ -34,7 +32,6 @@ export const logout = async (): Promise<string> => {
         localStorage.removeItem("jwtToken");
         return res.data;
     } catch (error) {
-        console.error("Logout failed:", error);
         throw error;
     }
 };
