@@ -67,14 +67,14 @@ export default function LoginForm() {
         <i className="fab fa-google me-2"></i> Sign in with Google
       </button>
 
-      <button
+      {/* <button
         type="button"
         className="btn btn-lg btn-block btn-primary w-100 mb-4"
         style={{ backgroundColor: '#3b5998' }}
         onClick={() => handleLogin('facebook')}
       >
         <i className="fab fa-facebook-f me-2"></i> Sign in with Facebook
-      </button>
+      </button> */}
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">

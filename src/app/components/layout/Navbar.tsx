@@ -4,13 +4,19 @@ import { RootState } from "@/store";
 import { setLoggedIn } from "@/store/authSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Navbar() {
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const dispatch = useDispatch();
+    const [hydrated, setHydrated] = useState(false);
 
     const router = useRouter();
+
+    useEffect(() => {
+        setHydrated(true);
+    }, []);
 
     const handleLoginLogout = async () => {
         if (isLoggedIn) {
@@ -21,6 +27,8 @@ export default function Navbar() {
             router.push('/login');
         }
     };
+
+    if (!hydrated) return null;
     
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">

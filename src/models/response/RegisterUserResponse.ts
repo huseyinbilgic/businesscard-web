@@ -7,5 +7,4 @@ export interface RegisterUserResponse {
     role: Role;
     createdAt: string;
     updatedAt: string;
-
 }
