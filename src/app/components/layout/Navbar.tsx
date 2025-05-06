@@ -22,6 +22,7 @@ export default function Navbar() {
         if (isLoggedIn) {
             await logout();
             dispatch(setLoggedIn(false));
+            router.replace('/');
         }
         else {
             router.push('/login');
@@ -29,7 +30,7 @@ export default function Navbar() {
     };
 
     if (!hydrated) return null;
-    
+
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div className="container">
@@ -49,6 +50,11 @@ export default function Navbar() {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto">
+                        <li className="nav-item">
+                            <Link href="/" className="nav-link">
+                                Profile
+                            </Link>
+                        </li>
                         <li className="nav-item">
                             <Link href="/" className="nav-link">
                                 Home

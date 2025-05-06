@@ -1,4 +1,5 @@
 import { PrivacyStatus } from "../enums/PrivacyStatus";
+import { ContactResponse } from "./ContactResponse";
 
 export interface BusinessCardResponse {
   id: number;
@@ -11,5 +12,5 @@ export interface BusinessCardResponse {
   privacy: PrivacyStatus;
   createdAt: string;
   updatedAt: string;
-  //private List<ContactResponse> contacts;
+  contacts: ContactResponse[];
 }
