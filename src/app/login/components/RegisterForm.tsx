@@ -49,6 +49,7 @@ export default function RegisterForm({ setIsLogin }: Props) {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<RegisterFormData>({
     mode: "all",
@@ -60,13 +61,23 @@ export default function RegisterForm({ setIsLogin }: Props) {
       confirmPassword,
       ...registerUserRequest
     }: RegisterFormData & { confirmPassword: string } = data;
+
     try {
-      const response = await registerUser(registerUserRequest);
+      const resp = await registerUser(registerUserRequest);
       reset();
       setIsLogin(true);
-      toast.success("Register successfull:", response);
+      toast.success(resp as string);
     } catch (error) {
-      toast.error(`Register failed: ${error}`);
+      if (typeof error === "string") {
+        toast.error(error);
+        return;
+      }
+      for (const [key, value] of Object.entries(error as object)) {
+        setError(key as keyof RegisterFormData, {
+          type: "server",
+          message: value.join(" \n "),
+        });
+      }
     }
   };
 

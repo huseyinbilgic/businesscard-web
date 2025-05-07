@@ -6,8 +6,6 @@ import * as yup from "yup";
 import FormInput from "./FormInput";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { setLoggedIn } from "@/store/authSlice";
 import { toast } from "react-toastify";
 
 type LoginFormData = {
@@ -30,10 +28,11 @@ const schema = yup.object().shape({
 
 export default function LoginForm() {
   const router = useRouter();
-  const dispatch = useDispatch();
+
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: yupResolver(schema),
@@ -41,13 +40,19 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      const response = await login(data);
-      if (response && response != '') {
-        dispatch(setLoggedIn(true));
-        router.replace("/");
-      }
+      await login(data);
+      router.replace("/");
     } catch (error) {
-      toast.error(`Login failed : ${error}`);
+      if (typeof error === "string") {
+        toast.error(error);
+        return;
+      }
+      for (const [key, value] of Object.entries(error as object)) {
+        setError(key as keyof LoginFormData, {
+          type: "server",
+          message: value.join(" \n "),
+        });
+      }
     }
   };
 
@@ -66,15 +71,6 @@ export default function LoginForm() {
       >
         <i className="fab fa-google me-2"></i> Sign in with Google
       </button>
-
-      {/* <button
-        type="button"
-        className="btn btn-lg btn-block btn-primary w-100 mb-4"
-        style={{ backgroundColor: '#3b5998' }}
-        onClick={() => handleLogin('facebook')}
-      >
-        <i className="fab fa-facebook-f me-2"></i> Sign in with Facebook
-      </button> */}
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">

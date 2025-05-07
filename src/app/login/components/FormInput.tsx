@@ -23,7 +23,13 @@ export default function FormInput<T extends FieldValues>({
         className={`form-control ${error ? 'is-invalid' : ''}`}
         {...register(name)}
       />
-      {error && <div className="invalid-feedback">{error}</div>}
+      {error && (
+        <div className="invalid-feedback">
+          {error.split("\n").map((line, index) => (
+            <div key={index}>{line}</div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

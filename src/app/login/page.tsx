@@ -21,21 +21,23 @@ export default function LoginPage() {
 
   useEffect(() => {
     const token = searchParams.get('jwtToken');
+    const error = searchParams.get('error');
+
+    if (error && !token) {
+      toast.error(error);
+      return;
+    }
+
     if (token) {
       localStorage.setItem('jwtToken', token);
       dispatch(setLoggedIn(true))
       router.replace('/');
-      toast.success('Login succesfull')
-    }
-
-    const error = searchParams.get('error');
-    if (error) {
-      toast.error(error);
+      toast.success('Login succesful');
     }
   }, [dispatch, router, searchParams]);
 
   if (loading) {
-    return <p>Yonlendiriliyor...</p>;
+    return <p>Redirecting...</p>;
   }
 
   return (

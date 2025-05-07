@@ -1,15 +1,14 @@
 'use client';
+
 import { logout } from "@/lib/auth";
 import { RootState } from "@/store";
-import { setLoggedIn } from "@/store/authSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function Navbar() {
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const dispatch = useDispatch();
     const [hydrated, setHydrated] = useState(false);
 
     const router = useRouter();
@@ -21,15 +20,12 @@ export default function Navbar() {
     const handleLoginLogout = async () => {
         if (isLoggedIn) {
             await logout();
-            dispatch(setLoggedIn(false));
             router.replace('/');
         }
         else {
             router.push('/login');
         }
-    };
-
-    if (!hydrated) return null;
+    }
 
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
@@ -51,7 +47,7 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto">
                         <li className="nav-item">
-                            <Link href="/" className="nav-link">
+                            <Link href="/profile" className="nav-link">
                                 Profile
                             </Link>
                         </li>
@@ -65,14 +61,18 @@ export default function Navbar() {
                                 About
                             </Link>
                         </li>
-                        <li className="nav-item">
-                            <button
-                                className="btn btn-outline-primary"
-                                onClick={handleLoginLogout}
-                            >
-                                {isLoggedIn ? 'Logout' : 'Login'}
-                            </button>
-                        </li>
+
+                        {
+                            hydrated ?
+                                <li className="nav-item">
+                                    <button
+                                        className="btn btn-outline-primary"
+                                        onClick={handleLoginLogout}
+                                    >
+                                        {isLoggedIn ? 'Logout' : 'Login'}
+                                    </button>
+                                </li> : null
+                        }
                     </ul>
                 </div>
             </div>

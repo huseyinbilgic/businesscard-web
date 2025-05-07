@@ -4,6 +4,7 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { fetchAllBusinesCardsByUsername } from "@/lib/businessCard";
 import { BusinessCardResponse } from "@/models/response/BusinessCardResponse";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Profile() {
     const { loading } = useAuthGuard();
@@ -11,17 +12,17 @@ export default function Profile() {
 
 
     useEffect(() => {
-        const loadBusinessCards = async () => {
-                try {
-                    const response = await fetchAllBusinesCardsByUsername();
-                    setBusinessCards(response);
-                } catch (err) {
-                    console.error(err);
-                }
-        };
-
         loadBusinessCards();
     }, []);
+
+    const loadBusinessCards = async () => {
+        try {
+            const response = await fetchAllBusinesCardsByUsername();
+            setBusinessCards(response);
+        } catch (err) {
+            toast.error(err as string);
+        }
+    }
 
     const handleEdit = (id: number) => {
         console.log("Edit", id);
@@ -58,10 +59,10 @@ export default function Profile() {
                                     <small className="text-muted">{card.company}</small>
                                 </div>
                                 <div className="d-flex gap-2">
-                                    <button className="btn btn-sm btn-light border" title="Edit">
+                                    <button className="btn btn-sm btn-light border" title="Edit" onClick={() => handleEdit(card.id)}>
                                         <i className="fas fa-edit text-primary"></i>
                                     </button>
-                                    <button className="btn btn-sm btn-light border" title="Delete">
+                                    <button className="btn btn-sm btn-light border" title="Delete" onClick={() => handleDelete(card.id)}>
                                         <i className="fas fa-trash text-danger"></i>
                                     </button>
                                 </div>

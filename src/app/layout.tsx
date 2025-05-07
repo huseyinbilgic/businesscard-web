@@ -21,11 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <BootstrapClient/>
+        <BootstrapClient />
         <Provider store={store}>
           <header>
             <Navbar />
           </header>
+          
           <main>
             {children}
           </main>
