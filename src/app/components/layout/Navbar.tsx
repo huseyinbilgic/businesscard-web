@@ -2,6 +2,7 @@
 
 import { logout } from "@/lib/auth";
 import { RootState } from "@/store";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -31,7 +32,13 @@ export default function Navbar() {
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div className="container">
                 <Link href="/" className="navbar-brand">
-                    <h2>MyApp</h2>
+                    <Image
+                        src="/business-card-logo.png"
+                        alt="Business Card Logo"
+                        width={100}
+                        height={100}
+                        priority
+                    />
                 </Link>
                 <button
                     className="navbar-toggler"
@@ -46,11 +53,14 @@ export default function Navbar() {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
                     <ul className="navbar-nav ms-auto">
-                        <li className="nav-item">
-                            <Link href="/profile" className="nav-link">
-                                Profile
-                            </Link>
-                        </li>
+                        {
+                            isLoggedIn ? <li className="nav-item">
+                                <Link href="/profile" className="nav-link">
+                                    Profile
+                                </Link>
+                            </li> : null
+                        }
+
                         <li className="nav-item">
                             <Link href="/" className="nav-link">
                                 Home
@@ -78,5 +88,4 @@ export default function Navbar() {
             </div>
         </nav>
     );
-
 }

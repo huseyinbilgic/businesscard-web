@@ -1,21 +1,19 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { RootState } from "@/store";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
-export const useAuthGuard = (): { loading: boolean } => {
+export const useAuthGuard = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const isInitialized = useSelector((state: RootState) => state.auth.isInitialized);
 
   useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-
-    if (!token) {
-      router.push('/login');
-    } else {
-      setLoading(false);
+    if (!isInitialized) return;
+    if (!isLoggedIn) {
+      router.push("/login");
     }
-  }, [router]);
-
-  return { loading };
+  }, [isLoggedIn, isInitialized, router]);
 };

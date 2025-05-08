@@ -16,8 +16,9 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
-  const { loading } = useRedirectIfAuthenticated();
   const dispatch = useDispatch();
+
+  useRedirectIfAuthenticated();
 
   useEffect(() => {
     const token = searchParams.get('jwtToken');
@@ -36,10 +37,6 @@ export default function LoginPage() {
     }
   }, [dispatch, router, searchParams]);
 
-  if (loading) {
-    return <p>Redirecting...</p>;
-  }
-
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light px-3">
       <div
@@ -50,7 +47,7 @@ export default function LoginPage() {
           {isLogin ? 'Welcome Back!' : 'Join Us'}
         </h3>
 
-        {isLogin ? <LoginForm /> : <RegisterForm setIsLogin={setIsLogin}/>}
+        {isLogin ? <LoginForm /> : <RegisterForm setIsLogin={setIsLogin} />}
 
         <div className="text-center mt-3">
           <small>

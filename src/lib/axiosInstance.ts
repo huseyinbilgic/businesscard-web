@@ -1,8 +1,11 @@
+import { store } from "@/store";
 import { setLoggedIn } from "@/store/authSlice";
 import axios from "axios";
 
+const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_API_URL}api/`;
+
 const instance = axios.create({
-  baseURL: `${process.env.NEXT_PUBLIC_BASE_API_URL}api/`,
+  baseURL: BASE_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -12,14 +15,17 @@ const instance = axios.create({
 const refreshAuthToken = async (): Promise<string> => {
   try {
     const response = await axios.post<string>(
-      `${process.env.NEXT_PUBLIC_BASE_API_URL}api/auth/refresh`,
+      `${BASE_URL}auth/refresh`,
       {},
       { withCredentials: true }
     );
+
+    localStorage.setItem("jwtToken", response.data);
+    store.dispatch(setLoggedIn(true));
     return response.data;
-  } catch (error) {
-    console.log(error);
-    throw new Error("Refresh token failed");
+  } catch (err) {
+    const data = (err as { response?: { data?: unknown } })?.response?.data;
+    throw new Error(`Refresh token failed: ${data}`);
   }
 };
 
@@ -52,7 +58,7 @@ const processQueue = (error: unknown, token: string | null): void => {
 const redirectToLogin = (): void => {
   if (typeof window !== "undefined") {
     localStorage.removeItem("jwtToken");
-    setLoggedIn(false)
+    store.dispatch(setLoggedIn(false));
     window.location.href = "/login";
   }
 };
@@ -60,7 +66,7 @@ const redirectToLogin = (): void => {
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("jwtToken");
-    if (token && config?.headers) {
+    if (token && config.headers) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
 
@@ -85,10 +91,7 @@ instance.interceptors.response.use(
         return new Promise<string>((resolve, reject) => {
           addToFailedQueue(resolve, reject);
         }).then((newToken: string) => {
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
+          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
           return instance(originalRequest);
         });
       }
@@ -97,18 +100,13 @@ instance.interceptors.response.use(
 
       try {
         const newToken = await refreshAuthToken();
-        localStorage.setItem("jwtToken", newToken);
-        setLoggedIn(true)
 
         instance.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${newToken}`;
 
         processQueue(null, newToken);
-        originalRequest.headers = {
-          ...originalRequest.headers,
-          Authorization: `Bearer ${newToken}`,
-        };
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return instance(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);

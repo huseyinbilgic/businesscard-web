@@ -1,7 +1,6 @@
 'use client';
 
 import "./globals.css";
-import { Inter } from "next/font/google";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { ToastContainer } from "react-toastify";
@@ -9,9 +8,9 @@ import { Provider } from "react-redux";
 import Navbar from "./components/layout/Navbar";
 import { store } from "@/store";
 import Footer from "./components/layout/Footer";
-import BootstrapClient from "./common/bootstrap-client";
+import BootstrapClient from "./common/BootstrapClient";
+import AuthInitializer from "./common/AuthInitializer";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -20,20 +19,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <BootstrapClient />
         <Provider store={store}>
-          <header>
-            <Navbar />
-          </header>
-          
-          <main>
-            {children}
-          </main>
+          <AuthInitializer>
+            <header>
+              <Navbar />
+            </header>
 
-          <footer >
-            <Footer />
-          </footer>
+            <main>
+              {children}
+            </main>
+
+            <footer >
+              <Footer />
+            </footer>
+          </AuthInitializer>
         </Provider>
         <ToastContainer
           position="top-right"

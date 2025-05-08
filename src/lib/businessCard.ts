@@ -3,7 +3,7 @@ import axios from "./axiosInstance";
 
 const endPoint = "business-cards/";
 
-export const fetchAllBusinesCardsByUsername = async (): Promise<
+export const fetchAllBusinesCards = async (): Promise<
   BusinessCardResponse[]
 > => {
   try {

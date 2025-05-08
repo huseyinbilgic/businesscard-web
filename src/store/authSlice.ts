@@ -2,11 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 interface AuthState {
   isLoggedIn: boolean;
+  isInitialized: boolean;
 }
 
 const initialState: AuthState = {
-  isLoggedIn:
-    typeof window !== "undefined" && !!localStorage.getItem("jwtToken"),
+  isLoggedIn: false,
+  isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -16,8 +17,11 @@ const authSlice = createSlice({
     setLoggedIn(state, action) {
       state.isLoggedIn = action.payload;
     },
+    setInitialized(state, action) {
+      state.isInitialized = action.payload;
+    }
   },
 });
 
-export const { setLoggedIn } = authSlice.actions;
+export const { setLoggedIn, setInitialized } = authSlice.actions;
 export default authSlice.reducer;

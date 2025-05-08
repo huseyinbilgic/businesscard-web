@@ -1,28 +1,35 @@
 "use client";
 
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { fetchAllBusinesCardsByUsername } from "@/lib/businessCard";
-import { BusinessCardResponse } from "@/models/response/BusinessCardResponse";
-import { useEffect, useState } from "react";
+import { fetchAllBusinesCards } from "@/lib/businessCard";
+import { RootState } from "@/store";
+import { setBusinessCards } from "@/store/businessCardSlice";
+import { useCallback, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import Redirecting from "../components/Redirecting";
 
 export default function Profile() {
-    const { loading } = useAuthGuard();
-    const [businessCards, setBusinessCards] = useState<BusinessCardResponse[]>([]);
+    useAuthGuard()
+    const businessCards = useSelector((state: RootState) => state.businessCard.businessCards);
+    const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
 
+    const dispatch = useDispatch();
 
-    useEffect(() => {
-        loadBusinessCards();
-    }, []);
-
-    const loadBusinessCards = async () => {
+    const loadBusinessCards = useCallback(async () => {
         try {
-            const response = await fetchAllBusinesCardsByUsername();
-            setBusinessCards(response);
+            const response = await fetchAllBusinesCards();
+            dispatch(setBusinessCards(response));
         } catch (err) {
             toast.error(err as string);
         }
-    }
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            loadBusinessCards();
+        }
+    }, [isLoggedIn, loadBusinessCards]);
 
     const handleEdit = (id: number) => {
         console.log("Edit", id);
@@ -34,8 +41,8 @@ export default function Profile() {
 
     };
 
-    if (loading) {
-        return <p>Yonlendiriliyor...</p>;
+    if (!isLoggedIn) {
+        return (<Redirecting></Redirecting>);
     }
 
     return (<div className="container py-4">
