@@ -1,6 +1,5 @@
 import { BusinessCardResponse } from "@/models/response/BusinessCardResponse";
-import { createSlice,  } from "@reduxjs/toolkit";
-
+import { createSlice } from "@reduxjs/toolkit";
 
 interface BusinessCardState {
   businessCards: BusinessCardResponse[];
@@ -20,5 +19,5 @@ const businessCardSlice = createSlice({
   },
 });
 
-export const {setBusinessCards} = businessCardSlice.actions;
+export const { setBusinessCards } = businessCardSlice.actions;
 export default businessCardSlice.reducer;
