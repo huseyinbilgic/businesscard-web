@@ -4,17 +4,20 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { fetchAllBusinesCards } from "@/lib/businessCard";
 import { RootState } from "@/store";
 import { setBusinessCards } from "@/store/businessCardSlice";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Redirecting from "../components/Redirecting";
+import GeneralModal, { GeneralModalRef } from "../modal/GeneralModal";
+import BusinessCardForm from "../forms/BusinessCardForm";
 
 export default function Profile() {
     useAuthGuard()
     const businessCards = useSelector((state: RootState) => state.businessCard.businessCards);
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-
+    const modalRef = useRef<GeneralModalRef>(null);
     const dispatch = useDispatch();
+    const [selectedBusinessCardId, setSelectedBusinessCardId] = useState<number | null>(null);
 
     const loadBusinessCards = useCallback(async () => {
         try {
@@ -31,9 +34,18 @@ export default function Profile() {
         }
     }, [isLoggedIn, loadBusinessCards]);
 
-    const handleEdit = (id: number) => {
-        console.log("Edit", id);
+    const openBusinessCardModal = () => {
+        modalRef.current?.open();
+    }
 
+    const addNewBusinessCard = () => {
+        setSelectedBusinessCardId(null);
+        openBusinessCardModal();
+    }
+
+    const handleEdit = (id: number) => {
+        setSelectedBusinessCardId(id);
+        openBusinessCardModal();
     };
 
     const handleDelete = (id: number) => {
@@ -49,7 +61,7 @@ export default function Profile() {
         <div className="container py-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="fw-semibold">My Business Cards</h3>
-                <button className="btn btn-primary rounded-pill px-4">
+                <button className="btn btn-primary rounded-pill px-4" onClick={addNewBusinessCard}>
                     <i className="fas fa-plus me-2"></i>
                     Add New Card
                 </button>
@@ -95,5 +107,8 @@ export default function Profile() {
                     </div>
                 ))}
             </div>
+            <GeneralModal ref={modalRef} title="Edit/Add Business Card">
+                <BusinessCardForm businessCardId={selectedBusinessCardId} modalRef={modalRef}></BusinessCardForm>
+            </GeneralModal>
         </div>);
 }
