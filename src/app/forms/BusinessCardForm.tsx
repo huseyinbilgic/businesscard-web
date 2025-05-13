@@ -14,29 +14,27 @@ import { mapBusinessCardResponseToFormData } from '../mapper/BusinessCardMapper'
 import { GeneralModalRef } from '../modal/GeneralModal';
 import { useDispatch } from 'react-redux';
 import { setBusinessCards } from '@/store/businessCardSlice';
+import FormInput from '../login/components/FormInput';
+import { OptionModel } from './common/OptionModel';
 
-type Props = {
-    businessCardId: number | null;
-    modalRef: RefObject<GeneralModalRef | null>;
-};
 
-const privacyOptions: PrivacyStatus[] = [
-    PrivacyStatus.PUBLIC,
-    PrivacyStatus.PRIVATE,
-    PrivacyStatus.RESTRICTED,
+const privacyOptions: OptionModel[] = [
+    { label: PrivacyStatus.PUBLIC, value: PrivacyStatus.PUBLIC },
+    { label: PrivacyStatus.PRIVATE, value: PrivacyStatus.PRIVATE },
+    { label: PrivacyStatus.RESTRICTED, value: PrivacyStatus.RESTRICTED }
 ];
 
-const contactTypeOptions: ContactType[] = [
-    ContactType.PHONE,
-    ContactType.EMAIL,
-    ContactType.WEBSITE,
-    ContactType.ADDRESS,
-    ContactType.SOCIAL,
+const contactTypeOptions: OptionModel[] = [
+    { label: ContactType.PHONE, value: ContactType.PHONE },
+    { label: ContactType.EMAIL, value: ContactType.EMAIL },
+    { label: ContactType.WEBSITE, value: ContactType.WEBSITE },
+    { label: ContactType.ADDRESS, value: ContactType.ADDRESS },
+    { label: ContactType.SOCIAL, value: ContactType.SOCIAL },
 ];
 
 const contactSchema = yup.object({
     id: yup.number(),
-    contactType: yup.mixed<ContactType>().oneOf(contactTypeOptions).required('ContactType is required'),
+    contactType: yup.mixed<ContactType>().oneOf(contactTypeOptions.map(p => p.label as ContactType)).required('ContactType is required'),
     label: yup.string().required('Label is required').max(255),
     contactValue: yup.string().required('Value is required').max(255),
 });
@@ -46,11 +44,16 @@ const schema = yup.object({
     company: yup.string().max(255).required().default(''),
     jobTitle: yup.string().max(255).required().default(''),
     aboutIt: yup.string().required().default(''),
-    privacy: yup.mixed<PrivacyStatus>().oneOf(privacyOptions).required('Privacy is required'),
+    privacy: yup.mixed<PrivacyStatus>().oneOf(privacyOptions.map(p => p.label as PrivacyStatus)).required('Privacy is required'),
     contactsRequests: yup.array().of(contactSchema).required(),
 });
 
 type BusinessCardFormData = yup.InferType<typeof schema>;
+
+type Props = {
+    businessCardId: number | null;
+    modalRef: RefObject<GeneralModalRef | null>;
+};
 
 export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
     const {
@@ -63,13 +66,10 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
     } = useForm<BusinessCardFormData>({
         mode: "all",
         resolver: yupResolver(schema),
-        defaultValues: {
-            contactsRequests: [],
-        }
+        defaultValues: { contactsRequests: [] },
     });
 
     const dispatch = useDispatch();
-
 
     const loadBusinessCards = useCallback(async () => {
         try {
@@ -80,17 +80,14 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
         }
     }, [dispatch]);
 
-    const { fields, append, remove } = useFieldArray({
-        control,
-        name: 'contactsRequests',
-    });
+    const { fields, append, remove } = useFieldArray({ control, name: 'contactsRequests' });
 
     const onSubmit = async (data: BusinessCardFormData) => {
         if (businessCardId === null) {
             await saveNewBusinessCard(data as BusinessCardRequest);
-            return;
+        } else {
+            await updateBusinessCard(data as BusinessCardRequest);
         }
-        await updateBusinessCard(data as BusinessCardRequest);
     };
 
     const saveNewBusinessCard = async (data: BusinessCardRequest) => {
@@ -100,13 +97,9 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
             await loadBusinessCards();
             toast.success('Business card saved successfully');
         } catch (error) {
-            if (typeof error === "string") {
-                toast.error(error);
-                return;
-            }
-            setErrors(error as object);
+            handleError(error);
         }
-    }
+    };
 
     const updateBusinessCard = async (data: BusinessCardRequest) => {
         try {
@@ -115,37 +108,35 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
             await loadBusinessCards();
             toast.success('Business card saved successfully');
         } catch (error) {
-            if (typeof error === "string") {
-                toast.error(error);
-                return;
-            }
-            setErrors(error as object);
+            handleError(error);
         }
-    }
+    };
 
-    const setErrors = (error: object) => {
-        for (const [key, value] of Object.entries(error)) {
+    const handleError = (error: unknown) => {
+        if (typeof error === 'string') {
+            toast.error(error);
+            return;
+        }
+        for (const [key, value] of Object.entries(error as Record<string, string[]>)) {
             setError(key as keyof BusinessCardFormData, {
-                type: "server",
-                message: value.join(" \n "),
+                type: 'server',
+                message: value.join(' \n '),
             });
         }
-    }
+    };
 
-    const loadBusinessCardById = useCallback(
-        async (id: number | null) => {
-            if (id === null) {
-                reset({});
-                return;
-            }
-            try {
-                const response = await fetchBusinessCardById(id);
-                reset(mapBusinessCardResponseToFormData(response));
-            } catch (error) {
-                toast.error(error as string);
-            }
-        },
-        [reset]);
+    const loadBusinessCardById = useCallback(async (id: number | null) => {
+        if (id === null) {
+            reset({});
+            return;
+        }
+        try {
+            const response = await fetchBusinessCardById(id);
+            reset(mapBusinessCardResponseToFormData(response));
+        } catch (error) {
+            toast.error(error as string);
+        }
+    }, [reset]);
 
     useEffect(() => {
         loadBusinessCardById(businessCardId);
@@ -153,43 +144,11 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
 
     return (
         <Form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <Form.Group className="mb-3">
-                <Form.Label>Full Name</Form.Label>
-                <Form.Control {...register('fullName')} isInvalid={!!errors.fullName} />
-                <Form.Control.Feedback type="invalid">
-                    {errors.fullName?.message}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>Company</Form.Label>
-                <Form.Control {...register('company')} />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>Job Title</Form.Label>
-                <Form.Control {...register('jobTitle')} /* isInvalid={!!errors.jobTitle} */ />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>About</Form.Label>
-                <Form.Control as="textarea" rows={3} {...register('aboutIt')} />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>Privacy</Form.Label>
-                <Form.Select {...register('privacy')} isInvalid={!!errors.privacy}>
-                    <option value="">Select</option>
-                    {privacyOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                            {opt}
-                        </option>
-                    ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                    {errors.privacy?.message}
-                </Form.Control.Feedback>
-            </Form.Group>
+            <FormInput label="Full Name" name="fullName" type="text" register={register} error={errors.fullName} isInvalid={!!errors.fullName} />
+            <FormInput label="Company" name="company" type="text" register={register} error={errors.company} isInvalid={!!errors.company} />
+            <FormInput label="Job Title" name="jobTitle" type="text" register={register} error={errors.jobTitle} isInvalid={!!errors.jobTitle} />
+            <FormInput label="About" name="aboutIt" type="textarea" as='textarea' register={register} error={errors.aboutIt} isInvalid={!!errors.aboutIt} />
+            <FormInput label="Privacy" name="privacy" type="select" as='select' options={privacyOptions} register={register} error={errors.privacy} isInvalid={!!errors.privacy} />
 
             <hr />
             <h5>Contacts</h5>
@@ -198,47 +157,36 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
                 <div key={field.id} className="border rounded p-3 mb-3">
                     <Row>
                         <Col md={4}>
-                            <Form.Group>
-                                <Form.Label>Type</Form.Label>
-                                <Form.Select
-                                    {...register(`contactsRequests.${index}.contactType`)}
-                                    isInvalid={!!errors.contactsRequests?.[index]?.contactType}
-                                >
-                                    <option value="">Select</option>
-                                    {contactTypeOptions.map((opt) => (
-                                        <option key={opt} value={opt}>
-                                            {opt}
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.contactsRequests?.[index]?.contactType?.message}
-                                </Form.Control.Feedback>
-                            </Form.Group>
+                            <FormInput
+                                label="Type"
+                                name={`contactsRequests.${index}.contactType`}
+                                type="select"
+                                as='select'
+                                options={contactTypeOptions}
+                                register={register}
+                                error={errors.contactsRequests?.[index]?.contactType}
+                                isInvalid={!!errors.contactsRequests?.[index]?.contactType}
+                            />
                         </Col>
                         <Col md={4}>
-                            <Form.Group>
-                                <Form.Label>Label</Form.Label>
-                                <Form.Control
-                                    {...register(`contactsRequests.${index}.label`)}
-                                    isInvalid={!!errors.contactsRequests?.[index]?.label}
-                                />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.contactsRequests?.[index]?.label?.message}
-                                </Form.Control.Feedback>
-                            </Form.Group>
+                            <FormInput
+                                label="Label"
+                                name={`contactsRequests.${index}.label`}
+                                type="text"
+                                register={register}
+                                error={errors.contactsRequests?.[index]?.label}
+                                isInvalid={!!errors.contactsRequests?.[index]?.label}
+                            />
                         </Col>
                         <Col md={3}>
-                            <Form.Group>
-                                <Form.Label>Value</Form.Label>
-                                <Form.Control
-                                    {...register(`contactsRequests.${index}.contactValue`)}
-                                    isInvalid={!!errors.contactsRequests?.[index]?.contactValue}
-                                />
-                                <Form.Control.Feedback type="invalid">
-                                    {errors.contactsRequests?.[index]?.contactValue?.message}
-                                </Form.Control.Feedback>
-                            </Form.Group>
+                            <FormInput
+                                label="Value"
+                                name={`contactsRequests.${index}.contactValue`}
+                                type="text"
+                                register={register}
+                                error={errors.contactsRequests?.[index]?.contactValue}
+                                isInvalid={!!errors.contactsRequests?.[index]?.contactValue}
+                            />
                         </Col>
                         <Col md={1} className="d-flex align-items-end">
                             <Button variant="danger" onClick={() => remove(index)}>
@@ -254,7 +202,6 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
             </Button>
 
             <hr />
-
             <Button type="submit" className="mt-3" variant="primary">
                 Gönder
             </Button>

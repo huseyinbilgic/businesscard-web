@@ -1,35 +1,63 @@
-import { UseFormRegister, FieldValues, Path } from 'react-hook-form';
+import { OptionModel } from '@/app/forms/common/OptionModel';
+import { Form } from 'react-bootstrap';
+import { UseFormRegister, FieldValues, FieldError, Path } from 'react-hook-form';
 
 type FormInputProps<T extends FieldValues> = {
-  label: string;
-  type: string;
   name: Path<T>;
+  label: string;
+  type?: 'text' | 'textarea' | 'select' | 'password' | 'email';
+  options?: OptionModel[];
+  isInvalid?: boolean;
+  error?: FieldError;
   register: UseFormRegister<T>;
-  error?: string;
+  as?: 'input' | 'textarea' | 'select';
+  rows?: number;
 };
 
 export default function FormInput<T extends FieldValues>({
-  label,
-  type,
   name,
-  register,
+  label,
+  type = 'text',
+  options,
+  isInvalid,
   error,
+  register,
+  as = 'input',
+  rows = 3,
 }: FormInputProps<T>) {
   return (
-    <div className="mb-3">
-      <label className="form-label">{label}</label>
-      <input
-        type={type}
-        className={`form-control ${error ? 'is-invalid' : ''}`}
-        {...register(name)}
-      />
-      {error && (
-        <div className="invalid-feedback">
-          {error.split("\n").map((line, index) => (
-            <div key={index}>{line}</div>
+    <Form.Group className="mb-3">
+      <Form.Label>{label}</Form.Label>
+      {as === 'textarea' ? (
+        <Form.Control
+          as="textarea"
+          rows={rows}
+          {...register(name)}
+          isInvalid={isInvalid}
+        />
+      ) : as === 'select' ? (
+        <Form.Select {...register(name)} isInvalid={isInvalid}>
+          <option value="">Select</option>
+          {options?.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
-        </div>
+        </Form.Select>
+      ) : (
+        <Form.Control
+          type={type}
+          {...register(name)}
+          isInvalid={isInvalid}
+        />
       )}
-    </div>
+      {isInvalid && (
+        <Form.Control.Feedback type="invalid">
+        {error?.message?.split("\n").map((msg, i) => (
+          <div key={i}>{msg.trim()}</div>
+        ))}
+      </Form.Control.Feedback>
+      )}
+    </Form.Group>
   );
 }

@@ -6,19 +6,14 @@ import * as yup from "yup";
 import FormInput from "./FormInput";
 import { registerUser } from "@/lib/auth";
 import { toast } from "react-toastify";
+import { Button, Form, Container } from "react-bootstrap";
 
 type Props = {
   setIsLogin: (value: boolean) => void;
 };
 
-type RegisterFormData = {
-  email: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-};
 
-const schema = yup.object().shape({
+const schema = yup.object({
   email: yup
     .string()
     .email("Enter a valid email.")
@@ -44,6 +39,8 @@ const schema = yup.object().shape({
     .required("Please confirm your password"),
 });
 
+type RegisterFormData = yup.InferType<typeof schema>;
+
 export default function RegisterForm({ setIsLogin }: Props) {
   const {
     register,
@@ -57,10 +54,7 @@ export default function RegisterForm({ setIsLogin }: Props) {
   });
 
   const submitRegisterUser = async (data: RegisterFormData) => {
-    const {
-      confirmPassword,
-      ...registerUserRequest
-    }: RegisterFormData & { confirmPassword: string } = data;
+    const { confirmPassword, ...registerUserRequest } = data;
 
     try {
       const resp = await registerUser(registerUserRequest);
@@ -82,46 +76,46 @@ export default function RegisterForm({ setIsLogin }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(submitRegisterUser)}>
-      <div className="mb-3">
-        <FormInput<RegisterFormData>
+    <Container style={{ maxWidth: "500px" }}>
+      <Form onSubmit={handleSubmit(submitRegisterUser)}>
+        <FormInput
           label="Email address"
           type="email"
           name="email"
           register={register}
-          error={errors.email?.message}
+          error={errors.email}
+          isInvalid={!!errors.email}
         />
-      </div>
-      <div className="mb-3">
-        <FormInput<RegisterFormData>
+
+        <FormInput
           label="Username"
           type="text"
           name="username"
           register={register}
-          error={errors.username?.message}
+          error={errors.username}
+          isInvalid={!!errors.username}
         />
-      </div>
-      <div className="mb-3">
-        <FormInput<RegisterFormData>
+        <FormInput
           label="Password"
           type="password"
           name="password"
           register={register}
-          error={errors.password?.message}
+          error={errors.password}
+          isInvalid={!!errors.password}
         />
-      </div>
-      <div className="mb-3">
-        <FormInput<RegisterFormData>
+        <FormInput
           label="Confirm Password"
           type="password"
           name="confirmPassword"
           register={register}
-          error={errors.confirmPassword?.message}
+          error={errors.confirmPassword}
+          isInvalid={!!errors.confirmPassword}
         />
-      </div>
-      <button type="submit" className="btn btn-primary w-100">
-        Register
-      </button>
-    </form>
+
+        <Button type="submit" variant="primary" className="w-100">
+          Register
+        </Button>
+      </Form>
+    </Container>
   );
 }

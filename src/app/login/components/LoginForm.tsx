@@ -7,13 +7,9 @@ import FormInput from "./FormInput";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { Button, Form, Container } from "react-bootstrap";
 
-type LoginFormData = {
-  usernameOrEmail: string;
-  password: string;
-};
-
-const schema = yup.object().shape({
+const schema = yup.object({
   usernameOrEmail: yup
     .string()
     .max(255, "Must be at most 255 characters.")
@@ -25,6 +21,7 @@ const schema = yup.object().shape({
     .matches(/^\S+$/, "Password cannot contain spaces!")
     .required("Password is required."),
 });
+type LoginFormData = yup.InferType<typeof schema>;
 
 export default function LoginForm() {
   const router = useRouter();
@@ -35,6 +32,7 @@ export default function LoginForm() {
     setError,
     formState: { errors },
   } = useForm<LoginFormData>({
+    mode:'all',
     resolver: yupResolver(schema),
   });
 
@@ -56,46 +54,45 @@ export default function LoginForm() {
     }
   };
 
-  const handleLogin = async (registration: string) => {
+  const handleLogin = (provider: string) => {
     const redirectUri = encodeURIComponent("http://localhost:3000/login");
-    window.location.href = `${process.env.BASE_API_URL}oauth2/authorization/${registration}?redirectUri=${redirectUri}`;
+    window.location.href = `${process.env.BASE_API_URL}oauth2/authorization/${provider}?redirectUri=${redirectUri}`;
   };
 
   return (
-    <div>
-      <button
-        type="button"
-        className="btn btn-lg btn-block btn-primary w-100 mb-3"
-        style={{ backgroundColor: '#dd4b39' }}
-        onClick={() => handleLogin('google')}
+    <Container style={{ maxWidth: "500px" }}>
+      <Button
+        variant="danger"
+        className="w-100 mb-3"
+        size="lg"
+        onClick={() => handleLogin("google")}
       >
         <i className="fab fa-google me-2"></i> Sign in with Google
-      </button>
+      </Button>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="mb-3">
-          <FormInput<LoginFormData>
-            label="Email address or Username"
-            type="text"
-            name="usernameOrEmail"
-            register={register}
-            error={errors.usernameOrEmail?.message}
-          />
-        </div>
-        <div className="mb-3">
-          <FormInput<LoginFormData>
-            label="Password"
-            type="password"
-            name="password"
-            register={register}
-            error={errors.password?.message}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary w-100">
+      <Form onSubmit={handleSubmit(onSubmit)}>
+        <FormInput
+          label="Email address or Username"
+          type="text"
+          name="usernameOrEmail"
+          register={register}
+          error={errors.usernameOrEmail}
+          isInvalid={!!errors.usernameOrEmail}
+        />
+
+        <FormInput
+          label="Password"
+          type="password"
+          name="password"
+          register={register}
+          error={errors.password}
+          isInvalid={!!errors.password}
+        />
+
+        <Button type="submit" variant="primary" className="w-100">
           Login
-        </button>
-      </form>
-    </div>
-
+        </Button>
+      </Form>
+    </Container>
   );
 }
