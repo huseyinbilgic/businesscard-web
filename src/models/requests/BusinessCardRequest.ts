@@ -3,9 +3,9 @@ import { ContactRequest } from "./ContactRequest";
 
 export interface BusinessCardRequest {
   fullName: string;
-  company: string;
-  jobTitle: string;
-  aboutIt: string;
+  company?: string | null;
+  jobTitle?: string | null;
+  aboutIt?: string | null;
   privacy: PrivacyStatus;
   contactsRequests: ContactRequest[];
 }

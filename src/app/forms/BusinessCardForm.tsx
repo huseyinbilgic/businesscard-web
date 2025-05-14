@@ -2,53 +2,18 @@
 
 import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from "yup";
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import { ContactType } from '@/models/enums/ContactType';
-import { PrivacyStatus } from '@/models/enums/PrivacyStatus';
 import { RefObject, useCallback, useEffect } from 'react';
 import { fetchAllBusinesCards, fetchBusinessCardById, saveNewBusinessCardByUsername, updateBusinessCardById } from '@/lib/businessCard';
 import { toast } from 'react-toastify';
 import { BusinessCardRequest } from '@/models/requests/BusinessCardRequest';
-import { mapBusinessCardResponseToFormData } from '../mapper/BusinessCardMapper';
+import { mapBusinessCardFormDataToBusinessCardRequest, mapBusinessCardResponseToFormData } from '../mapper/BusinessCardMapper';
 import { GeneralModalRef } from '../modal/GeneralModal';
 import { useDispatch } from 'react-redux';
 import { setBusinessCards } from '@/store/businessCardSlice';
 import FormInput from '../login/components/FormInput';
-import { OptionModel } from './common/OptionModel';
-
-
-const privacyOptions: OptionModel[] = [
-    { label: PrivacyStatus.PUBLIC, value: PrivacyStatus.PUBLIC },
-    { label: PrivacyStatus.PRIVATE, value: PrivacyStatus.PRIVATE },
-    { label: PrivacyStatus.RESTRICTED, value: PrivacyStatus.RESTRICTED }
-];
-
-const contactTypeOptions: OptionModel[] = [
-    { label: ContactType.PHONE, value: ContactType.PHONE },
-    { label: ContactType.EMAIL, value: ContactType.EMAIL },
-    { label: ContactType.WEBSITE, value: ContactType.WEBSITE },
-    { label: ContactType.ADDRESS, value: ContactType.ADDRESS },
-    { label: ContactType.SOCIAL, value: ContactType.SOCIAL },
-];
-
-const contactSchema = yup.object({
-    id: yup.number(),
-    contactType: yup.mixed<ContactType>().oneOf(contactTypeOptions.map(p => p.label as ContactType)).required('ContactType is required'),
-    label: yup.string().required('Label is required').max(255),
-    contactValue: yup.string().required('Value is required').max(255),
-});
-
-const schema = yup.object({
-    fullName: yup.string().required('Fullname is required').max(255),
-    company: yup.string().max(255).required().default(''),
-    jobTitle: yup.string().max(255).required().default(''),
-    aboutIt: yup.string().required().default(''),
-    privacy: yup.mixed<PrivacyStatus>().oneOf(privacyOptions.map(p => p.label as PrivacyStatus)).required('Privacy is required'),
-    contactsRequests: yup.array().of(contactSchema).required(),
-});
-
-type BusinessCardFormData = yup.InferType<typeof schema>;
+import { BusinessCardFormData, businessCardSchema, contactTypeOptions, privacyOptions } from './form-data/BusinessCardFormData';
 
 type Props = {
     businessCardId: number | null;
@@ -65,7 +30,7 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
         formState: { errors },
     } = useForm<BusinessCardFormData>({
         mode: "all",
-        resolver: yupResolver(schema),
+        resolver: yupResolver(businessCardSchema),
         defaultValues: { contactsRequests: [] },
     });
 
@@ -83,10 +48,11 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
     const { fields, append, remove } = useFieldArray({ control, name: 'contactsRequests' });
 
     const onSubmit = async (data: BusinessCardFormData) => {
+        const request = mapBusinessCardFormDataToBusinessCardRequest(data)
         if (businessCardId === null) {
-            await saveNewBusinessCard(data as BusinessCardRequest);
+            await saveNewBusinessCard(request);
         } else {
-            await updateBusinessCard(data as BusinessCardRequest);
+            await updateBusinessCard(request);
         }
     };
 

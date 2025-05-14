@@ -1,5 +1,6 @@
 import { BusinessCardRequest } from "@/models/requests/BusinessCardRequest";
 import { BusinessCardResponse } from "@/models/response/BusinessCardResponse";
+import { BusinessCardFormData } from "../forms/form-data/BusinessCardFormData";
 
 export function mapBusinessCardResponseToFormData(
   card: BusinessCardResponse
@@ -16,5 +17,13 @@ export function mapBusinessCardResponseToFormData(
       label: c.label,
       contactValue: c.contactValue,
     })),
+  };
+}
+
+export function mapBusinessCardFormDataToBusinessCardRequest(
+  params: BusinessCardFormData
+): BusinessCardRequest {
+  return {
+    ...params,
   };
 }

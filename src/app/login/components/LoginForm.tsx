@@ -2,26 +2,12 @@
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import FormInput from "./FormInput";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button, Form, Container } from "react-bootstrap";
-
-const schema = yup.object({
-  usernameOrEmail: yup
-    .string()
-    .max(255, "Must be at most 255 characters.")
-    .matches(/^\S+$/, "Username or email cannot contain spaces!")
-    .required("Username or email is required"),
-
-  password: yup
-    .string()
-    .matches(/^\S+$/, "Password cannot contain spaces!")
-    .required("Password is required."),
-});
-type LoginFormData = yup.InferType<typeof schema>;
+import { LoginFormData, loginSchema } from "@/app/forms/form-data/LoginFormData";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -33,7 +19,7 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm<LoginFormData>({
     mode:'all',
-    resolver: yupResolver(schema),
+    resolver: yupResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -60,7 +46,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Container style={{ maxWidth: "500px" }}>
+    <Container>
       <Button
         variant="danger"
         className="w-100 mb-3"

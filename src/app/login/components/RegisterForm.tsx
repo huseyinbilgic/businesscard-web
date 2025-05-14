@@ -2,44 +2,16 @@
 
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import FormInput from "./FormInput";
 import { registerUser } from "@/lib/auth";
 import { toast } from "react-toastify";
 import { Button, Form, Container } from "react-bootstrap";
+import { RegisterFormData, registerSchema } from "@/app/forms/form-data/RegisterFormData";
+import { mapRegisterFormDataToRegisterUserRequest } from "@/app/mapper/UserMapper";
 
 type Props = {
   setIsLogin: (value: boolean) => void;
 };
-
-
-const schema = yup.object({
-  email: yup
-    .string()
-    .email("Enter a valid email.")
-    .max(255, "Must be at most 255 characters.")
-    .matches(/^\S+$/, "Email cannot contain spaces!")
-    .required("Email is required"),
-
-  username: yup
-    .string()
-    .max(255, "Must be at most 255 characters.")
-    .matches(/^\S+$/, "Username cannot contain spaces!")
-    .required("Username is required"),
-
-  password: yup
-    .string()
-    .matches(/^\S+$/, "Password cannot contain spaces!")
-    .required("Password is required"),
-
-  confirmPassword: yup
-    .string()
-    .matches(/^\S+$/, "Password cannot contain spaces!")
-    .oneOf([yup.ref("password")], "Passwords must match")
-    .required("Please confirm your password"),
-});
-
-type RegisterFormData = yup.InferType<typeof schema>;
 
 export default function RegisterForm({ setIsLogin }: Props) {
   const {
@@ -50,11 +22,11 @@ export default function RegisterForm({ setIsLogin }: Props) {
     formState: { errors },
   } = useForm<RegisterFormData>({
     mode: "all",
-    resolver: yupResolver(schema),
+    resolver: yupResolver(registerSchema),
   });
 
   const submitRegisterUser = async (data: RegisterFormData) => {
-    const { confirmPassword, ...registerUserRequest } = data;
+    const registerUserRequest = mapRegisterFormDataToRegisterUserRequest(data);
 
     try {
       const resp = await registerUser(registerUserRequest);
@@ -76,7 +48,7 @@ export default function RegisterForm({ setIsLogin }: Props) {
   };
 
   return (
-    <Container style={{ maxWidth: "500px" }}>
+    <Container>
       <Form onSubmit={handleSubmit(submitRegisterUser)}>
         <FormInput
           label="Email address"

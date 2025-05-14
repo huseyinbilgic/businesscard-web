@@ -1,4 +1,4 @@
-import { OptionModel } from '@/app/forms/common/OptionModel';
+import { OptionModel } from '@/app/forms/models/OptionModel';
 import { Form } from 'react-bootstrap';
 import { UseFormRegister, FieldValues, FieldError, Path } from 'react-hook-form';
 
