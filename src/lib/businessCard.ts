@@ -52,3 +52,16 @@ export const updateBusinessCardById = async (
     throw parseValidationErrors(error);
   }
 };
+
+export const deleteBusinessCardById = async (
+  id: number
+): Promise<string> => {
+  try {
+    const response = await axios.delete<string>(
+      `${endPoint}${id}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

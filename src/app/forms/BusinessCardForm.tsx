@@ -4,23 +4,20 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import { ContactType } from '@/models/enums/ContactType';
-import { RefObject, useCallback, useEffect } from 'react';
-import { fetchAllBusinesCards, fetchBusinessCardById, saveNewBusinessCardByUsername, updateBusinessCardById } from '@/lib/businessCard';
+import { useCallback, useEffect } from 'react';
+import { fetchBusinessCardById, saveNewBusinessCardByUsername, updateBusinessCardById } from '@/lib/businessCard';
 import { toast } from 'react-toastify';
 import { BusinessCardRequest } from '@/models/requests/BusinessCardRequest';
 import { mapBusinessCardFormDataToBusinessCardRequest, mapBusinessCardResponseToFormData } from '../mapper/BusinessCardMapper';
-import { GeneralModalRef } from '../modal/GeneralModal';
-import { useDispatch } from 'react-redux';
-import { setBusinessCards } from '@/store/businessCardSlice';
 import FormInput from '../login/components/FormInput';
 import { BusinessCardFormData, businessCardSchema, contactTypeOptions, privacyOptions } from './form-data/BusinessCardFormData';
 
 type Props = {
     businessCardId: number | null;
-    modalRef: RefObject<GeneralModalRef | null>;
+    closeModal: () => void;
 };
 
-export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
+export default function BusinessCardForm({ businessCardId, closeModal }: Props) {
     const {
         register,
         control,
@@ -33,17 +30,6 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
         resolver: yupResolver(businessCardSchema),
         defaultValues: { contactsRequests: [] },
     });
-
-    const dispatch = useDispatch();
-
-    const loadBusinessCards = useCallback(async () => {
-        try {
-            const response = await fetchAllBusinesCards();
-            dispatch(setBusinessCards(response));
-        } catch (err) {
-            toast.error(err as string);
-        }
-    }, [dispatch]);
 
     const { fields, append, remove } = useFieldArray({ control, name: 'contactsRequests' });
 
@@ -59,8 +45,7 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
     const saveNewBusinessCard = async (data: BusinessCardRequest) => {
         try {
             await saveNewBusinessCardByUsername(data);
-            modalRef.current?.close();
-            await loadBusinessCards();
+            closeModal();
             toast.success('Business card saved successfully');
         } catch (error) {
             handleError(error);
@@ -70,8 +55,7 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
     const updateBusinessCard = async (data: BusinessCardRequest) => {
         try {
             await updateBusinessCardById(businessCardId!, data);
-            modalRef.current?.close();
-            await loadBusinessCards();
+            closeModal()
             toast.success('Business card saved successfully');
         } catch (error) {
             handleError(error);
@@ -168,9 +152,11 @@ export default function BusinessCardForm({ businessCardId, modalRef }: Props) {
             </Button>
 
             <hr />
-            <Button type="submit" className="mt-3" variant="primary">
-                Gönder
-            </Button>
+            <div className='d-flex justify-content-end'>
+                <Button type="submit" variant="primary">
+                    Gönder
+                </Button>
+            </div>
         </Form>
     );
 }

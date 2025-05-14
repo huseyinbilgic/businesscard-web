@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { fetchAllBusinesCards } from "@/lib/businessCard";
+import { deleteBusinessCardById, fetchAllBusinesCards } from "@/lib/businessCard";
 import { RootState } from "@/store";
 import { setBusinessCards } from "@/store/businessCardSlice";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,12 +10,14 @@ import { toast } from "react-toastify";
 import Redirecting from "../components/Redirecting";
 import GeneralModal, { GeneralModalRef } from "../modal/GeneralModal";
 import BusinessCardForm from "../forms/BusinessCardForm";
+import Confirm from "../modal/Confirm";
 
 export default function Profile() {
     useAuthGuard()
     const businessCards = useSelector((state: RootState) => state.businessCard.businessCards);
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-    const modalRef = useRef<GeneralModalRef>(null);
+    const editSaveModalRef = useRef<GeneralModalRef>(null);
+    const confirmModalRef = useRef<GeneralModalRef>(null);
     const dispatch = useDispatch();
     const [selectedBusinessCardId, setSelectedBusinessCardId] = useState<number | null>(null);
 
@@ -34,24 +36,38 @@ export default function Profile() {
         }
     }, [isLoggedIn, loadBusinessCards]);
 
-    const openBusinessCardModal = () => {
-        modalRef.current?.open();
-    }
-
-    const addNewBusinessCard = () => {
-        setSelectedBusinessCardId(null);
-        openBusinessCardModal();
-    }
-
-    const handleEdit = (id: number) => {
+    const addOrEditBusinessCard = (id: number | null) => {
         setSelectedBusinessCardId(id);
-        openBusinessCardModal();
-    };
+        editSaveModalRef.current?.open();
+    }
 
     const handleDelete = (id: number) => {
-        console.log("Delete", id);
+        setSelectedBusinessCardId(id);
+        confirmModalRef.current?.open();
 
     };
+
+    const applyDelete = async () => {
+        try {
+            await deleteBusinessCardById(selectedBusinessCardId!)
+            loadBusinessCards();
+            toast.success('Business Card deleted');
+        } catch (error) {
+            toast.error(error as string);
+        } finally {
+            closeConfirmModal();
+        }
+    }
+
+    const closeConfirmModal = () => {
+        setSelectedBusinessCardId(null);
+        confirmModalRef.current?.close();
+    }
+
+    const closeBusinessCardFormModal = () => {
+        editSaveModalRef.current?.close();
+        loadBusinessCards();
+    }
 
     if (!isLoggedIn) {
         return (<Redirecting></Redirecting>);
@@ -61,7 +77,7 @@ export default function Profile() {
         <div className="container py-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="fw-semibold">My Business Cards</h3>
-                <button className="btn btn-primary rounded-pill px-4" onClick={addNewBusinessCard}>
+                <button className="btn btn-primary rounded-pill px-4" onClick={() => addOrEditBusinessCard(null)}>
                     <i className="fas fa-plus me-2"></i>
                     Add New Card
                 </button>
@@ -79,7 +95,7 @@ export default function Profile() {
                                         <small className="text-muted">{card.company}</small>
                                     </div>
                                     <div className="d-flex gap-2">
-                                        <button className="btn btn-sm btn-light border" title="Edit" onClick={() => handleEdit(card.id)}>
+                                        <button className="btn btn-sm btn-light border" title="Edit" onClick={() => addOrEditBusinessCard(card.id)}>
                                             <i className="fas fa-edit text-primary"></i>
                                         </button>
                                         <button className="btn btn-sm btn-light border" title="Delete" onClick={() => handleDelete(card.id)}>
@@ -107,8 +123,11 @@ export default function Profile() {
                     </div>
                 ))}
             </div>
-            <GeneralModal ref={modalRef} title="Edit/Add Business Card">
-                <BusinessCardForm businessCardId={selectedBusinessCardId} modalRef={modalRef}></BusinessCardForm>
+            <GeneralModal ref={editSaveModalRef} title="Edit/Add Business Card">
+                <BusinessCardForm businessCardId={selectedBusinessCardId} closeModal={closeBusinessCardFormModal}></BusinessCardForm>
+            </GeneralModal>
+            <GeneralModal ref={confirmModalRef} title="Confirm">
+                <Confirm apply={applyDelete} close={closeConfirmModal}></Confirm>
             </GeneralModal>
         </div>);
 }
