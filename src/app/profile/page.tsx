@@ -11,6 +11,7 @@ import Redirecting from "../components/Redirecting";
 import GeneralModal, { GeneralModalRef } from "../modal/GeneralModal";
 import BusinessCardForm from "../forms/BusinessCardForm";
 import Confirm from "../modal/Confirm";
+import PrivacyUserForm from "../forms/PrivacyUserForm";
 
 export default function Profile() {
     useAuthGuard()
@@ -18,6 +19,7 @@ export default function Profile() {
     const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
     const editSaveModalRef = useRef<GeneralModalRef>(null);
     const confirmModalRef = useRef<GeneralModalRef>(null);
+    const privacyUserModalRef = useRef<GeneralModalRef>(null);
     const dispatch = useDispatch();
     const [selectedBusinessCardId, setSelectedBusinessCardId] = useState<number | null>(null);
 
@@ -44,6 +46,12 @@ export default function Profile() {
     const handleDelete = (id: number) => {
         setSelectedBusinessCardId(id);
         confirmModalRef.current?.open();
+
+    };
+
+    const handlePrivacyUsers = (id: number) => {
+        setSelectedBusinessCardId(id);
+        privacyUserModalRef.current?.open();
 
     };
 
@@ -95,6 +103,9 @@ export default function Profile() {
                                         <small className="text-muted">{card.company}</small>
                                     </div>
                                     <div className="d-flex gap-2">
+                                        <button className="btn btn-sm btn-light border" title="Users" onClick={() => handlePrivacyUsers(card.id)}>
+                                            <i className="fas fa-user-circle text-info"></i>
+                                        </button>
                                         <button className="btn btn-sm btn-light border" title="Edit" onClick={() => addOrEditBusinessCard(card.id)}>
                                             <i className="fas fa-edit text-primary"></i>
                                         </button>
@@ -128,6 +139,9 @@ export default function Profile() {
             </GeneralModal>
             <GeneralModal ref={confirmModalRef} title="Confirm">
                 <Confirm apply={applyDelete} close={closeConfirmModal}></Confirm>
+            </GeneralModal>
+            <GeneralModal ref={privacyUserModalRef} title="Add Or Remove User">
+                <PrivacyUserForm businessCardId={selectedBusinessCardId!} closeModal={() => privacyUserModalRef.current?.close()}></PrivacyUserForm>
             </GeneralModal>
         </div>);
 }
