@@ -1,4 +1,4 @@
-import { Button, Container } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 type Props = {
     apply: () => void;
@@ -7,7 +7,7 @@ type Props = {
 
 export default function Confirm({ apply, close }: Props) {
     return (
-        <Container>
+        <div>
             <i className="fas fa-question-circle fa-3x text-primary mb-3"></i>
             <h5 className="mb-3">Are you sure?</h5>
             <p className="text-muted mb-0">
@@ -21,6 +21,6 @@ export default function Confirm({ apply, close }: Props) {
                     Apply
                 </Button>
             </div>
-        </Container>
+        </div>
     );
 }

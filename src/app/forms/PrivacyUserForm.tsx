@@ -1,12 +1,12 @@
 'use client';
 
-import { fetchPrivacyUsersByBusinessCardId } from "@/lib/businessCardPrivacy";
+import { fetchPrivacyUsersByBusinessCardId, savePrivacyUsersByBusinessCardId } from "@/lib/businessCardPrivacy";
 import { PrivacyUser } from "@/models/response/PrivacyUser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import debounce from 'lodash.debounce';
 import { searchUser } from "@/lib/user";
-import { Container, Form, Spinner, ListGroup, Button } from "react-bootstrap";
+import { Form, Spinner, ListGroup, Button } from "react-bootstrap";
 
 type Props = {
     businessCardId: number;
@@ -19,15 +19,15 @@ export default function PrivacyUserForm({ businessCardId, closeModal }: Props) {
     const [privacyUsers, setPrivacyUsers] = useState<PrivacyUser[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const loadPrivacyUsers = useCallback(async (id: number) => {
-        if (!id) return;
+    const loadPrivacyUsers = useCallback(async () => {
         try {
-            const response = await fetchPrivacyUsersByBusinessCardId(id);
+            const response = await fetchPrivacyUsersByBusinessCardId(businessCardId);
             setPrivacyUsers(response);
         } catch (error) {
             toast.error(error as string);
+            closeModal();
         }
-    }, []);
+    }, [businessCardId, closeModal]);
 
     const search = useMemo(() =>
         debounce(async (term: string) => {
@@ -41,15 +41,15 @@ export default function PrivacyUserForm({ businessCardId, closeModal }: Props) {
                 const res = await searchUser(term);
                 setResults(res);
             } catch (err) {
-                console.error('Arama hatası:', err);
+                console.error('Error during searching:', err);
             } finally {
                 setLoading(false);
             }
         }, 400), []);
 
     useEffect(() => {
-        loadPrivacyUsers(businessCardId);
-    }, [businessCardId, loadPrivacyUsers]);
+        loadPrivacyUsers();
+    }, [loadPrivacyUsers]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -64,7 +64,7 @@ export default function PrivacyUserForm({ businessCardId, closeModal }: Props) {
             setKeyword('');
             setResults([]);
         } else {
-            toast.info("Bu kullanıcı zaten eklendi.");
+            toast.info("This user has already added.");
         }
     };
 
@@ -72,15 +72,27 @@ export default function PrivacyUserForm({ businessCardId, closeModal }: Props) {
         setPrivacyUsers(prev => prev.filter(user => user.id !== id));
     };
 
+    const save = async () => {
+        try {
+            const userIds: number[] = privacyUsers.map(p => p.id)
+            const response = await savePrivacyUsersByBusinessCardId(businessCardId, userIds);
+            toast.success(response);
+        } catch (error) {
+            toast.error(error as string);
+        }
+        finally {
+            closeModal();
+        }
+    }
+
     return (
-        <Container className="p-4">
+        <div>
             <Form.Control
                 type="text"
-                placeholder="Kullanıcı ara..."
+                placeholder="Search user..."
                 className="p-3 rounded-4 shadow-sm border-0"
                 style={{
                     backgroundColor: '#f0f2f5',
-                    fontSize: '1rem',
                 }}
                 value={keyword}
                 onChange={handleChange}
@@ -104,49 +116,50 @@ export default function PrivacyUserForm({ businessCardId, closeModal }: Props) {
                         }}
                         onClick={() => handleSelectUser(user)}
                     >
-                        <span style={{ fontSize: '0.95rem' }}>{user.username}</span>
-                        <i className="fas fa-plus-circle text-primary" style={{ fontSize: '1.2rem' }}></i>
+                        <span>{user.username}</span>
+                        <i className="fas fa-plus-circle text-primary"></i>
                     </ListGroup.Item>
 
                 ))}
             </ListGroup>
 
             {!loading && keyword && results.length === 0 && (
-                <div className="text-muted text-center mt-3">Sonuç bulunamadı</div>
+                <div className="text-muted text-center mt-3">No result found</div>
             )}
 
             {privacyUsers.length > 0 && (
-                <div className="mt-5">
-                    <h6 className="fw-semibold text-muted mb-3">Seçilen Kullanıcılar</h6>
-                    <ListGroup className="shadow-sm rounded-4 overflow-hidden mb-3">
+                <div className="mt-4">
+                    <h6 className="fw-semibold text-muted mb-3">Added users</h6>
+                    <div className="d-flex flex-wrap gap-2">
                         {privacyUsers.map((user: PrivacyUser) => (
-                            <ListGroup.Item
+                            <div
                                 key={user.id}
-                                className="py-2 px-3 d-flex justify-content-between align-items-center"
+                                className="d-flex align-items-center border rounded-pill px-3 py-2"
                             >
-                                <span style={{ fontSize: '0.95rem' }}>{user.username}</span>
+                                <span className="me-2">{user.username}</span>
                                 <Button
-                                    variant="outline-danger"
+                                    variant="link"
                                     size="sm"
+                                    className="p-0 m-0"
                                     onClick={() => handleRemoveUser(user.id)}
+                                    style={{ lineHeight: 1 }}
                                 >
-                                    <i className="fas fa-trash-alt text-danger" style={{ fontSize: '1rem' }}></i>
-
+                                    <i className="fas fa-times text-danger"></i>
                                 </Button>
-                            </ListGroup.Item>
+                            </div>
                         ))}
-                    </ListGroup>
+                    </div>
                 </div>
             )}
 
             <Button
                 className="w-100 mt-3 py-3 rounded-4 shadow-sm"
                 variant="primary"
-                onClick={() => closeModal()}
+                onClick={save}
             >
-                Kaydet
+                Save
             </Button>
-        </Container>
+        </div>
 
     );
 }

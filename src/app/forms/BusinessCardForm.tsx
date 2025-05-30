@@ -148,13 +148,13 @@ export default function BusinessCardForm({ businessCardId, closeModal }: Props) 
             ))}
 
             <Button variant="outline-primary" onClick={() => append({ contactType: ContactType.PHONE, label: '', contactValue: '' })}>
-                Yeni İletişim Ekle
+                Add New Contact
             </Button>
 
             <hr />
             <div className='d-flex justify-content-end'>
                 <Button type="submit" variant="primary">
-                    Gönder
+                    Save
                 </Button>
             </div>
         </Form>

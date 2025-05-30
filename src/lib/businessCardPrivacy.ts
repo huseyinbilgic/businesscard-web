@@ -15,3 +15,18 @@ export const fetchPrivacyUsersByBusinessCardId = async (
     throw error;
   }
 };
+
+export const savePrivacyUsersByBusinessCardId = async (
+  id: number,
+  userIds: number[]
+): Promise<string> => {
+  try {
+    const response = await axios.post<string>(
+      `${endPoint}business-card/${id}`,
+      userIds
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
